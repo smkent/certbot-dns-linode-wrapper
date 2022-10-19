@@ -14,7 +14,7 @@ if [ -z "${linode_api_key}" ]; then
 fi
 
 cat >"${linode_creds_ini}" <<EOF
-dns_linode_key = ${linode_api_key}"
+dns_linode_key = ${linode_api_key}
 dns_linode_version = ${CERTBOT_LINODE_API_VERSION:-4}
 EOF
 chmod 400 "${linode_creds_ini}"
