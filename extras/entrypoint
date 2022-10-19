@@ -1,0 +1,43 @@
+#!/bin/sh
+linode_creds_ini=/tmp/certbot-linode.ini
+
+cat >"${linode_creds_ini}" <<EOF
+dns_linode_key = $(cat /run/secrets/certbot-linode-key)
+dns_linode_version = ${CERTBOT_LINODE_API_VERSION:-4}
+EOF
+chmod 400 "${linode_creds_ini}"
+
+certbot_args=
+if [ "${CERTBOT_STAGING-0}" -gt 0 ]; then
+    certbot_args="${certbot_args} --staging"
+fi
+for host in ${CERTBOT_HOSTS?}; do
+    certbot_args="${certbot_args} -d ${host}"
+done
+
+(
+    set -x
+    certbot \
+        certonly \
+        -m "${CERTBOT_EMAIL?}" \
+        -v \
+        -n \
+        --expand \
+        --agree-tos \
+        --dns-linode \
+        --dns-linode-propagation-seconds 180 \
+        --dns-linode-credentials "${linode_creds_ini}" \
+        ${certbot_args} \
+        "${@}"
+)
+
+if [ -n "${CERTBOT_INIT}" ]; then
+    exit 0
+fi
+
+# Check for renewal once every 12 hours
+trap exit TERM
+while :; do
+    sleep 12h
+    certbot renew
+done
