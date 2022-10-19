@@ -8,7 +8,7 @@ elif [ -f "/run/secrets/${CERTBOT_LINODE_API_KEY?}" ]; then
 else
     linode_api_key="${CERTBOT_LINODE_API_KEY}"
 fi
-if [ -n "${linode_api_key}" ]; then
+if [ -z "${linode_api_key}" ]; then
     echo "Error: Linode API key not found via \$CERTBOT_LINODE_API_KEY" >&2
     exit 1
 fi
